@@ -133,9 +133,8 @@ controller:
 
   # -- Environment variables to pass to application controller
   env:
-    []
-    # - name: "ARGOCD_CONTROLLER_REPLICAS"
-    #   value: ""
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: /var/run/secrets/tokens/gcp-ksa/google-application-credentials.json
 
   # -- envFrom to pass to application controller
   # @default -- `[]` (See [values.yaml])
@@ -190,10 +189,31 @@ controller:
     timeoutSeconds: 1
 
   # -- Additional volumeMounts to the application controller main container
-  volumeMounts: []
+  volumeMounts:
+    - mountPath: /custom-tools
+      name: custom-tools
+    - name: gcp-ksa
+      mountPath: /var/run/secrets/tokens/gcp-ksa
+      readOnly: true
 
   # -- Additional volumes to the application controller pod
-  volumes: []
+  volumes:
+    - name: custom-tools
+      emptyDir: {}
+    - name: gcp-ksa
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            path: token
+            audience: xuebinz-gke.svc.id.goog
+            expirationSeconds: 172800
+        - configMap:
+            name: my-cloudsdk-config
+            optional: false
+            items:
+              - key: "config"
+                path: "google-application-credentials.json"
 
   ## Controller service configuration
   service:
@@ -238,8 +258,6 @@ controller:
     create: true
     # -- Service account name
     name: argocd-application-controller
-    # -- Annotations applied to created service account
-    annotations: {}
     # -- Automount API credentials for the Service Account
     automountServiceAccountToken: true
 
@@ -330,7 +348,19 @@ controller:
   ## If your target Kubernetes cluster(s) require a custom auth provider executable
   ## you could use this (and the same in the server pod) to bootstrap
   ## that executable into your ArgoCD container
-  initContainers: []
+  initContainers:
+    - name: gcp-exec-credentials-installer
+      image: golang:1.17-buster
+      env:
+        - name: GOPATH
+          value: /custom-tools/go
+      command: [sh, -c]
+      args:
+        - go install github.com/zhang-xuebin/gcp-exec-creds@c5f0ad1
+      volumeMounts:
+        - mountPath: /custom-tools
+          name: custom-tools
+
   #  - name: download-tools
   #    image: alpine:3.8
   #    command: [sh, -c]
@@ -783,7 +813,9 @@ server:
     enabled: true
 
   # -- Environment variables to pass to Argo CD server
-  env: []
+  env:
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: /var/run/secrets/tokens/gcp-ksa/google-application-credentials.json
 
   # -- envFrom to pass to Argo CD server
   # @default -- `[]` (See [values.yaml])
@@ -837,10 +869,31 @@ server:
     timeoutSeconds: 1
 
   # -- Additional volumeMounts to the server main container
-  volumeMounts: []
+  volumeMounts:
+    - mountPath: /custom-tools
+      name: custom-tools
+    - name: gcp-ksa
+      mountPath: /var/run/secrets/tokens/gcp-ksa
+      readOnly: true
 
   # -- Additional volumes to the server pod
-  volumes: []
+  volumes:
+    - name: custom-tools
+      emptyDir: {}
+    - name: gcp-ksa
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            path: token
+            audience: xuebinz-gke.svc.id.goog
+            expirationSeconds: 172800
+        - configMap:
+            name: my-cloudsdk-config
+            optional: false
+            items:
+              - key: "config"
+                path: "google-application-credentials.json"
 
   # -- [Node selector]
   nodeSelector: {}
@@ -962,8 +1015,6 @@ server:
     create: true
     # -- Server service account name
     name: argocd-server
-    # -- Annotations applied to created service account
-    annotations: {}
     # -- Automount API credentials for the Service Account
     automountServiceAccountToken: true
 
@@ -1310,7 +1361,19 @@ server:
   ## If your target Kubernetes cluster(s) require a custom auth provider executable
   ## you could use this (and the same in the application controller pod) to bootstrap
   ## that executable into your ArgoCD container
-  initContainers: []
+  initContainers:
+    - name: gcp-exec-credentials-installer
+      image: golang:1.17-buster
+      env:
+        - name: GOPATH
+          value: /custom-tools/go
+      command: [sh, -c]
+      args:
+        - go install github.com/zhang-xuebin/gcp-exec-creds@c5f0ad1
+      volumeMounts:
+        - mountPath: /custom-tools
+          name: custom-tools
+
   #  - name: download-tools
   #    image: alpine:3.8
   #    command: [sh, -c]
@@ -1802,3 +1865,4 @@ configs:
 openshift:
   # -- enables using arbitrary uid for argo repo server
   enabled: false
+

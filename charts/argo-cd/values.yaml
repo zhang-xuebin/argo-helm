@@ -14,7 +14,7 @@ global:
     # -- If defined, a repository applied to all Argo CD deployments
     repository: quay.io/argoproj/argocd
     # -- Overrides the global Argo CD image tag whose default is the chart appVersion
-    tag: ""
+    tag: v2.4.7
     # -- If defined, a imagePullPolicy applied to all Argo CD deployments
     imagePullPolicy: IfNotPresent
   # -- Annotations for the all deployed pods
@@ -240,7 +240,8 @@ controller:
     # -- Service account name
     name: argocd-application-controller
     # -- Annotations applied to created service account
-    annotations: {}
+    annotations:
+      iam.gke.io/gcp-service-account: argo-wi-sa@xuebinz-gke.iam.gserviceaccount.com
     # -- Automount API credentials for the Service Account
     automountServiceAccountToken: true
 
@@ -998,7 +999,7 @@ server:
     # -- Server service labels
     labels: {}
     # -- Server service type
-    type: ClusterIP
+    type: LoadBalancer
     # -- Server service http port for NodePort service type (only if `server.service.type` is set to "NodePort")
     nodePortHttp: 30080
     # -- Server service https port for NodePort service type (only if `server.service.type` is set to "NodePort")
@@ -1067,7 +1068,8 @@ server:
     # -- Server service account name
     name: argocd-server
     # -- Annotations applied to created service account
-    annotations: {}
+    annotations:
+      iam.gke.io/gcp-service-account: argo-wi-sa@xuebinz-gke.iam.gserviceaccount.com
     # -- Automount API credentials for the Service Account
     automountServiceAccountToken: true
 

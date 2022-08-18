@@ -55,6 +55,11 @@ After registration, you should be able to see it by running:
 gcloud container fleet memberships list --project $FLEET_PROJECT
 ```
 
+Enable Connect Gateway API for future use
+```
+gcloud services enable --project=FLEET_PROJECT connectgateway.googleapis.com 
+```
+
 Prepare a yaml file like the example in `cluster-enroll/target-gke.yaml`, apply the yaml file to ArgoCD cluster.
 
 ```

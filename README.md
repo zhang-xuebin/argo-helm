@@ -1,9 +1,9 @@
-# Use ArgoCD to Manage Clusters Across Different Platforms 
+# Use ArgoCD to Manage (Private/Public) GKE clusters
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Chart Publish](https://github.com/argoproj/argo-helm/actions/workflows/publish.yml/badge.svg?branch=main)](https://github.com/argoproj/argo-helm/actions/workflows/publish.yml)
 
-If you land on this repo, probably you are looking for a solution to let ArgoCD manage your **(private)** GKE clusters, Anthos(VMWare, BareMetal) Clusters. In this solution, we introduce how to use Connect Gateway and ArgoCD to achive that purpose.
+If you land on this repo, probably you are looking for a solution to let ArgoCD manage your **(private)** GKE clusters, Anthos(VMWare, BareMetal) Clusters, etc. In this solution, we introduce how to use Connect Gateway and ArgoCD to achive that purpose.
 
 This repo has twon special branches: 
  - `host-on-gke` this branch contains the configurations on how to set up when the central ArgoCD instance is running on a GKE cluster.
@@ -11,7 +11,7 @@ This repo has twon special branches:
 
 ## Host on GKE
 
-Here we distinguish two project, `HOST_PROJECT` is the GCP project which runs the ArgoCD cluster, `FLEET_PROJECT` which is the GCP project which runs the managed external cluster. Note that these two cluster can be *different*. 
+Here we distinguish two projects, `HOST_PROJECT` is the GCP project which runs the central ArgoCD cluster, `FLEET_PROJECT` which is the GCP project which runs the managed external cluster. Note that these two cluster can be *different*. 
 
 ### Set up Central Host Cluster
 
@@ -88,6 +88,9 @@ stringData:
 ```
 
 Now, should be able to select the private GKE cluster in ArgoCD's UI.
+
+### Read more:
+- [Connect Gateway and ArgoCD: Deploy to Distributed Kubernetes](https://cloud.google.com/blog/products/containers-kubernetes/connect-gateway-with-argocd)
 
 
 
